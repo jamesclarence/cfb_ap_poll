@@ -1,4 +1,3 @@
-library(magrittr)
 library(rvest)
 library(dplyr)
 library(stringr)
@@ -7,10 +6,7 @@ library(stringr)
 
 poll <- read_html("http://collegepollarchive.com/football/ap/seasons.cfm?appollid=32#.VihxlhCrSRs")
 
-# http://collegepollarchive.com/football/ap/seasons.cfm?appollid=33#.VixGBBCrSRs
-# You can replace the number after appollid=# + 1 to get every poll
-
-# 1 Get Date of Poll
+### 1 Get Date of Poll
 
 # 1A Get Table with: Rank, Team, FPV, Conf, WLT, PTS
 
@@ -64,7 +60,29 @@ poll_url <- cbind(begin = poll_url_begin, num = poll_number, end = poll_url_end)
 # Each Poll's URL
 poll_url_all <- apply(poll_url, 1, paste, collapse="")
 
+get_date <- function(url) {
+    poll <- read_html(url)
+    poll_date <- poll %>%
+        html_node("td h2") %>%
+        html_text()
+    print(poll_date)
+}
 
+# all_polls function should have get_date function incorporated somehow
+all_polls <- function(poll_list){
+    df <- data.frame()
+    for (i in poll_list)
+        x <- read_html(i)
+        x_table <- html_table(x, fill = T)[[9]]
+        x_date <- x %>%
+            html_node("td h2") %>%
+            html_text()
+        print(x_date)
+        x_date2 <- gsub(" AP Football Poll", "", x_date)
+        print(x_date2)
+        x_date3 <- rep(x_date2, length.out = nrow(x))
+        df <- cbind(x_date3, x_table)
+        df
+}
 
-
-
+poll_sub <- poll_url_all[20:25]
