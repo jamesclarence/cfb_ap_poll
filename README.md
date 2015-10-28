@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-# first-repo
-=======
-# cfb_ap_poll
-Every College Football AP Poll
->>>>>>> 9abcbc8d78f92f064f5ff552dfe91e4947217254
+# College Football AP Poll
+
+An attempt to scrape each college football AP Poll from http://collegepollarchive.com/.
