@@ -2,12 +2,12 @@ library(rvest)
 library(dplyr)
 library(stringr)
 
-### Get Each Weekly AP Poll's URL
+#### Get Each Weekly AP Poll's URL from collegepollarchive.com
 
-## Try #1:
-    # Split URL in 3 parts
-    # Replace 2nd part with new ascending Number
-    # Combine Three parts
+## To get each URL:
+# 1. Split the whole URL in 3 parts
+# 2. Replace 2nd part with new ascending number
+# 3. Combine the three parts
 
 poll_url1 <- "http://collegepollarchive.com/football/ap/seasons.cfm?appollid="
 poll_url2 <- "32"
@@ -29,6 +29,7 @@ poll_url_all <- apply(poll_url, 1, paste, collapse="")
 # A subset of poll_url_all
 poll_sub <- poll_url_all[20:25]
 
+#####
 # Function to get date from one poll's html
 get_date <- function(url) {
     poll <- read_html(url)
@@ -48,53 +49,14 @@ remove_ap_football_from_get_date <- function(url){
     date2
 }
 
-# all_polls function should have get_date function incorporated somehow
-all_polls <- function(poll_list){
-    df <- data.frame()
-    for (i in poll_list)
-        x <- read_html(i)
-        x_table <- html_table(x, fill = T)[[9]]
-        x_date <- x %>%
-            html_node("td h2") %>%
-            html_text()
-        print(x_date)
-        x_date2 <- gsub(" AP Football Poll", "", x_date)
-        print(x_date2)
-        x_date3 <- rep(x_date2, length.out = nrow(x))
-        df <- cbind(x_date3, x_table)
-        df
+# Function that takes binds poll date and poll information
+ap_table <- function(url){
+    html <- read_html(url)
+    date <- remove_ap_football_from_get_date(url)
+    table <- html_table(html, fill = T)[[9]]
+    date_length <- rep(date, length.out = nrow(table))
+    poll <- cbind(date_length, table)
+    print(poll)
 }
 
-lapply(poll_sub, all_polls)
-
-# AP Polls
-
-poll <- read_html("http://collegepollarchive.com/football/ap/seasons.cfm?appollid=32#.VihxlhCrSRs")
-
-### 1 Get Date of Poll
-
-# 1A Get Table with: Rank, Team, FPV, Conf, WLT, PTS
-
-poll_table <- html_table(poll, fill = T)[[9]]
-
-# Remove Columns With NA
-poll_table[,-(8:12)]
-
-# 1B Date Line
-poll_date <- poll %>%
-    html_node("td h2") %>%
-    html_text()
-
-# [1] "October 14, 1940 AP Football Poll"
-
-# 1C Remove " AP Football Poll" from poll_date
-
-date_only <- gsub(" AP Football Poll", "", poll_date)
-
-# 1D Repeat date_only length of poll_table
-date_only2 <- rep(date_only, length = nrow(poll_table))
-
-# 1E Add date_only2 to poll_table
-poll_table2 <- cbind(date_only2, poll_table)
-
-# 1F Add week_number to poll_table
+lapply(poll_sub, ap_table)
