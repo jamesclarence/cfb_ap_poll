@@ -59,4 +59,40 @@ ap_table <- function(url){
     print(poll)
 }
 
-lapply(poll_sub, ap_table)
+# lapply(poll_sub, ap_table)
+
+#### To Do Next ####
+## Clean the tables
+
+df <- poll_url_all[5] %>% ap_table()
+
+# Remove last row (all NAs)
+remove_na_row <- function(poll_table){
+    poll_nrow <- nrow(poll_table)
+    print(poll_nrow)
+    poll_table[-(poll_nrow),]
+}
+
+# Remove last five columns (all NAs)
+remove_na_columns <- function(poll_table){
+    poll_length <- length(poll_table)
+    first_na_column <- poll_length-4
+    df <- poll_table[,-c(first_na_column:poll_length)]
+    print(df)
+}
+
+remove_na <- function(poll_table){
+    # remove last row of NA
+    df <- remove_na_row(poll_table)
+
+    # remove last five columns (all NAs)
+    df2 <- remove_na_columns(df)
+
+    print(df2)
+}
+
+# Split date_length column into Month | Day | Year columns
+
+# Split WLT column into W | L | T columns
+
+# Change remaining NA column to Last Week
