@@ -1,32 +1,9 @@
-library(rvest)
+source("ap_poll_urls.R")
+
 library(dplyr)
 library(stringr)
 
-#### Get Each Weekly AP Poll's URL from collegepollarchive.com
-
-## To get each URL:
-# 1. Split the whole URL in 3 parts
-# 2. Replace 2nd part with new ascending number
-# 3. Combine the three parts
-
-poll_url1 <- "http://collegepollarchive.com/football/ap/seasons.cfm?appollid="
-poll_url2 <- "32"
-poll_url3 <- "#.VihxlhCrSRs"
-
-# poll_url2 goes up to 1096 (Oct 25, 2015)
-# 32:1096
-
-poll_number <- data.frame(32:1096)
-
-poll_url_begin <- rep(poll_url1, length = nrow(poll_number))
-poll_url_end <- rep(poll_url3, length = nrow(poll_number))
-poll_url <- cbind(begin = poll_url_begin, num = poll_number, end = poll_url_end) %>%
-                sapply(as.character)
-
-# Each Poll's URL
-poll_url_all <- apply(poll_url, 1, paste, collapse="")
-
-# A subset of poll_url_all
+# A subset of poll_url_all from ap_poll_urls.R
 poll_sub <- poll_url_all[20:25]
 
 #####
@@ -81,6 +58,7 @@ remove_na_columns <- function(poll_table){
     print(df)
 }
 
+# Combines remove_na_row & remove_na_columns functions
 remove_na <- function(poll_table){
     # remove last row of NA
     df <- remove_na_row(poll_table)
@@ -92,7 +70,27 @@ remove_na <- function(poll_table){
 }
 
 # Split date_length column into Month | Day | Year columns
+split_date <- function(poll_table){
+    x <- str_split_fixed(poll_table$date_length, ", ", 2)
+    x2 <- str_split_fixed(x[,1], " ", 2)
+    poll_date <- cbind(x2,x[,2])
+    colnames(poll_date) <- c("month", "date", "year")
+    print(poll_date)
+}
 
 # Split WLT column into W | L | T columns
+split_wlt <- function(poll_table){
+    x <- str_split_fixed(poll_table$WLT, "-", 3)
+    colnames(x) <- c("win", "loss", "tie")
+    print(x)
+}
 
 # Change remaining NA column to Last Week
+
+# Team (FPV) slit into two columns
+split_fpv <- function(poll_table){
+    x <- str_split_fixed(df$`Team (FPV)`, "\r\n\t\t\t ", 2)
+    x[,2] <- str_replace(x[,2],"\\(", "") %>% str_replace("\\)","")
+    colnames(x) <- c("team", "fpv")
+    print(x)
+}
